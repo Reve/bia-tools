@@ -19,8 +19,11 @@
   let attempts = $state(0);
   let elapsedMs = $state(0);
 
-  // Time limit in milliseconds (30 seconds)
-  const TIME_LIMIT_MS = 30000;
+  // Time limit (adjustable via slider)
+  let timeLimitSec = $state(30);
+  const MIN_TIME_LIMIT = 5;
+  const MAX_TIME_LIMIT = 360;
+  let timeLimitMs = $derived(timeLimitSec * 1000);
 
   // Abort controller for cancellation
   let abortMining = false;
@@ -84,7 +87,7 @@
       elapsedMs = performance.now() - startTime;
 
       // Check time limit
-      if (elapsedMs >= TIME_LIMIT_MS) {
+      if (elapsedMs >= timeLimitMs) {
         miningResult = { timedOut: true, attempts: nonce, time: elapsedMs };
         isMining = false;
         return;
@@ -111,6 +114,7 @@
     elapsedMs = 0;
     data = 'Hello, blockchain!';
     difficulty = 2;
+    timeLimitSec = 30;
   }
 
   function formatTime(ms) {
@@ -176,6 +180,30 @@
           <span>Hard ({MAX_DIFFICULTY})</span>
         </div>
       </div>
+
+      <!-- Time Limit Slider -->
+      <div>
+        <label for="pow-time-limit" class="block text-sm font-medium text-ink mb-1">
+          Time Limit:
+          <span class="font-mono text-cobalt">{timeLimitSec}s</span>
+        </label>
+        <input
+          id="pow-time-limit"
+          type="range"
+          min={MIN_TIME_LIMIT}
+          max={MAX_TIME_LIMIT}
+          step="5"
+          bind:value={timeLimitSec}
+          disabled={isMining}
+          class="w-full h-2 bg-mist rounded-lg appearance-none cursor-pointer accent-cobalt
+                 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Set time limit from {MIN_TIME_LIMIT} to {MAX_TIME_LIMIT} seconds"
+        />
+        <div class="flex justify-between text-xs text-slate mt-1">
+          <span>{MIN_TIME_LIMIT}s</span>
+          <span>{MAX_TIME_LIMIT}s</span>
+        </div>
+      </div>
     </div>
 
     <!-- Target Pattern Display -->
@@ -236,7 +264,7 @@
         </h3>
         {#if isMining}
           <span class="text-xs text-slate">
-            Limit: {formatTime(TIME_LIMIT_MS)}
+            Limit: {formatTime(timeLimitMs)}
           </span>
         {/if}
       </div>
@@ -298,7 +326,7 @@
       {:else if miningResult?.timedOut}
         <div>
           <p class="text-sm text-rose font-medium">
-            Could not find a valid nonce within {formatTime(TIME_LIMIT_MS)}.
+            Could not find a valid nonce within {formatTime(timeLimitMs)}.
             Tried {formatNumber(miningResult.attempts)} nonces.
           </p>
           <p class="text-xs text-slate mt-1">
@@ -324,16 +352,16 @@
         {/each}
       </div>
       <div class="mt-3 w-full bg-mist rounded-full h-1.5" role="progressbar"
-           aria-label="Time elapsed" aria-valuenow={elapsedMs} aria-valuemax={TIME_LIMIT_MS}>
+           aria-label="Time elapsed" aria-valuenow={elapsedMs} aria-valuemax={timeLimitMs}>
         <div
           class="h-1.5 rounded-full transition-all duration-300"
-          class:bg-amber={elapsedMs < TIME_LIMIT_MS * 0.75}
-          class:bg-rose={elapsedMs >= TIME_LIMIT_MS * 0.75}
-          style="width: {Math.min(100, (elapsedMs / TIME_LIMIT_MS) * 100)}%"
+          class:bg-amber={elapsedMs < timeLimitMs * 0.75}
+          class:bg-rose={elapsedMs >= timeLimitMs * 0.75}
+          style="width: {Math.min(100, (elapsedMs / timeLimitMs) * 100)}%"
         ></div>
       </div>
       <div class="text-xs text-slate mt-1 text-right">
-        {formatTime(elapsedMs)} / {formatTime(TIME_LIMIT_MS)}
+        {formatTime(elapsedMs)} / {formatTime(timeLimitMs)}
       </div>
     </div>
   {/if}
