@@ -28,36 +28,51 @@
   // Track which block is being edited (for highlighting)
   let editingBlockId = $state(null);
 
+  // Track if initial chain has been computed (to lock in previousHash values)
+  let chainInitialized = $state(false);
+
+  // Version counter to handle concurrent async calls
+  let computeVersion = 0;
+
   // Compute hashes and validity for all blocks
   $effect(() => {
-    computeChain();
+    // Explicitly read all block data to ensure reactivity tracking
+    const blockData = blocks.map(b => ({ data: b.data, nonce: b.nonce }));
+    computeChain(blockData);
   });
 
-  async function computeChain() {
-    // First pass: compute all hashes based on current data
-    // We need to compute hashes in order since each depends on the previous
+  async function computeChain(blockData) {
+    const currentVersion = ++computeVersion;
+
+    // First pass: compute what the hashes WOULD be if chain was valid
+    // This is needed to set initial previousHash values
     const computedHashes = [];
     for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      // Use stored previousHash if it exists, otherwise compute from previous block
-      const prevHash = block.previousHash || (i === 0 ? GENESIS_PREVIOUS_HASH : computedHashes[i - 1]);
-      const blockContent = `${block.data}${block.nonce}${prevHash}`;
+      const prevHash = i === 0 ? GENESIS_PREVIOUS_HASH : computedHashes[i - 1];
+      const blockContent = `${blockData[i].data}${blockData[i].nonce}${prevHash}`;
       computedHashes[i] = await sha256(blockContent);
+
+      // Check if a newer computation started
+      if (currentVersion !== computeVersion) return;
     }
 
-    // Second pass: set previousHash only if not already set, and determine validity
+    // Second pass: set previousHash (only on first run) and compute actual currentHash
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
 
-      // Only set previousHash on initial computation (when empty)
-      // This preserves the original chain links
-      if (!block.previousHash) {
+      // Only set previousHash on initial computation
+      // This locks in the chain links so we can detect tampering
+      if (!chainInitialized) {
         block.previousHash = i === 0 ? GENESIS_PREVIOUS_HASH : computedHashes[i - 1];
       }
 
-      // Compute current hash based on stored previousHash
+      // Compute current hash using the STORED previousHash
+      // (which may differ from what it "should" be if chain was tampered)
       const blockContent = `${block.data}${block.nonce}${block.previousHash}`;
       block.currentHash = await sha256(blockContent);
+
+      // Check if a newer computation started
+      if (currentVersion !== computeVersion) return;
 
       // Determine validity
       if (i === 0) {
@@ -69,6 +84,11 @@
         // 2. Previous block's current hash matches this block's stored previousHash
         block.isValid = prevBlock.isValid && (prevBlock.currentHash === block.previousHash);
       }
+    }
+
+    // Mark chain as initialized after first computation
+    if (!chainInitialized) {
+      chainInitialized = true;
     }
   }
 
@@ -84,6 +104,7 @@
       originalNonce: b.nonce
     }));
     editingBlockId = null;
+    chainInitialized = false; // Allow previousHash to be recomputed
   }
 
   function resetBlock(index) {
