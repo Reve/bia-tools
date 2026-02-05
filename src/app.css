@@ -22,45 +22,112 @@
   p {
     @apply leading-relaxed text-slate;
   }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
   .card {
-    @apply bg-paper border border-mist rounded-card p-5 shadow-card;
+    @apply bg-paper border border-mist rounded-card p-5 shadow-card
+           transition-shadow duration-200;
   }
 
   .btn-primary {
     @apply bg-cobalt text-white px-4 py-2 rounded-lg font-medium
-           hover:bg-cobalt/90 focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2
-           transition-colors duration-150;
+           hover:bg-cobalt/90 active:scale-[0.98]
+           focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2
+           transition-all duration-150;
   }
 
   .btn-secondary {
     @apply bg-transparent text-cobalt border border-cobalt px-4 py-2 rounded-lg font-medium
-           hover:bg-cobalt/5 focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2
-           transition-colors duration-150;
+           hover:bg-cobalt/5 active:scale-[0.98]
+           focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2
+           transition-all duration-150;
   }
 
   .badge-valid {
-    @apply bg-emerald text-white text-sm font-medium px-2 py-1 rounded;
+    @apply bg-emerald text-white text-sm font-medium px-2 py-1 rounded
+           transition-colors duration-200;
   }
 
   .badge-invalid {
-    @apply bg-rose text-white text-sm font-medium px-2 py-1 rounded;
+    @apply bg-rose text-white text-sm font-medium px-2 py-1 rounded
+           transition-colors duration-200;
   }
 
   .badge-neutral {
-    @apply bg-mist text-slate text-sm font-medium px-2 py-1 rounded;
+    @apply bg-mist text-slate text-sm font-medium px-2 py-1 rounded
+           transition-colors duration-200;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-mist rounded-lg bg-white text-ink
+    @apply w-full px-3 py-2.5 sm:px-4 sm:py-3 border border-mist rounded-lg bg-white text-ink
            focus:outline-none focus:ring-2 focus:ring-cobalt focus:border-transparent
            transition-all duration-150;
   }
 
   .hash-output {
-    @apply font-mono text-sm bg-ink/5 p-4 rounded-lg break-all
-           border border-mist;
+    @apply font-mono text-xs sm:text-sm bg-ink/5 p-3 sm:p-4 rounded-lg break-all
+           border border-mist transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  /* Screen reader only utility (Tailwind provides sr-only but we add focus variant) */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Fade-in animation for module transitions */
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Tooltip entrance animation */
+  .animate-tooltip-in {
+    animation: tooltipIn 150ms ease-out;
+  }
+
+  @keyframes tooltipIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 4px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  /* Active tab indicator scale */
+  .scale-y-125 {
+    transform: scaleY(1.25);
   }
 }

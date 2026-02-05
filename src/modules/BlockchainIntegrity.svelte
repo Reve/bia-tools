@@ -118,7 +118,7 @@
   let hasModifiedBlocks = $derived(blocks.some(b => b.data !== b.originalData || b.nonce !== b.originalNonce));
 </script>
 
-<div class="blockchain-integrity">
+<section class="blockchain-integrity" aria-label="Blockchain Integrity Explorer">
   <!-- Header -->
   <div class="mb-8">
     <h2 class="text-2xl font-semibold text-ink mb-3">Blockchain Integrity</h2>
@@ -130,25 +130,25 @@
   </div>
 
   <!-- Chain Status Bar -->
-  <div class="card mb-6">
+  <div class="card mb-6" aria-live="polite">
     <div class="flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-6">
+      <div class="flex items-center gap-6" role="status" aria-label="Chain status: {validCount} valid, {invalidCount} invalid blocks">
         <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-emerald"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald" aria-hidden="true"></span>
           <span class="text-sm text-slate">Valid: {validCount}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-rose"></span>
+          <span class="w-3 h-3 rounded-full bg-rose" aria-hidden="true"></span>
           <span class="text-sm text-slate">Invalid: {invalidCount}</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
         {#if hasModifiedBlocks}
-          <span class="text-xs text-amber font-medium px-2 py-1 bg-amber/10 rounded">
+          <span class="text-xs text-amber font-medium px-2 py-1 bg-amber/10 rounded animate-fade-in" role="alert">
             Chain Modified
           </span>
         {/if}
-        <button class="btn-secondary text-sm" onclick={resetChain}>
+        <button class="btn-secondary text-sm" onclick={resetChain} aria-label="Reset entire blockchain to original state">
           Reset Chain
         </button>
       </div>
@@ -156,28 +156,31 @@
   </div>
 
   <!-- Blockchain Visualization -->
-  <div class="mb-8 overflow-x-auto">
+  <div class="mb-8 overflow-x-auto" role="region" aria-label="Interactive blockchain visualization" tabindex="0">
     <div class="flex items-stretch gap-2 min-w-max pb-4">
       {#each blocks as block, index}
         <!-- Block Card -->
         <div class="flex items-stretch">
           <div
-            class="block-card w-72 flex-shrink-0 card transition-all duration-200 {block.isValid ? 'border-emerald bg-emerald/5' : 'border-rose bg-rose/5'} {editingBlockId === block.id ? 'ring-2 ring-cobalt' : ''}"
+            class="block-card w-64 sm:w-72 flex-shrink-0 card transition-all duration-200 {block.isValid ? 'border-emerald bg-emerald/5' : 'border-rose bg-rose/5'} {editingBlockId === block.id ? 'ring-2 ring-cobalt' : ''}"
+            role="article"
+            aria-label="{index === 0 ? 'Genesis' : 'Block ' + (index + 1)}: {block.isValid ? 'Valid' : 'Invalid'}"
           >
             <!-- Block Header -->
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-base font-semibold text-ink flex items-center gap-2">
                 <span
-                  class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold text-white"
+                  class="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold text-white transition-colors duration-200"
                   class:bg-emerald={block.isValid}
                   class:bg-rose={!block.isValid}
+                  aria-hidden="true"
                 >
                   {index + 1}
                 </span>
                 {index === 0 ? 'Genesis' : `Block ${index + 1}`}
               </h3>
               <span
-                class="text-xs font-medium px-2 py-0.5 rounded"
+                class="text-xs font-medium px-2 py-0.5 rounded transition-colors duration-200"
                 class:badge-valid={block.isValid}
                 class:badge-invalid={!block.isValid}
               >
@@ -196,6 +199,7 @@
                 placeholder="Block data..."
                 rows="2"
                 class="input-field resize-none text-xs"
+                aria-describedby="block-status-{block.id}"
               ></textarea>
             </div>
 
@@ -215,14 +219,18 @@
                 <button
                   type="button"
                   onclick={() => { if (block.nonce > 0) block.nonce--; }}
-                  class="w-8 h-8 rounded bg-mist hover:bg-slate/20 text-ink font-bold text-sm transition-colors"
+                  class="w-8 h-8 rounded bg-mist hover:bg-slate/20 text-ink font-bold text-sm transition-colors duration-150
+                         focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
+                  aria-label="Decrease nonce for {index === 0 ? 'Genesis block' : 'Block ' + (index + 1)}"
                 >
                   -
                 </button>
                 <button
                   type="button"
                   onclick={() => block.nonce++}
-                  class="w-8 h-8 rounded bg-mist hover:bg-slate/20 text-ink font-bold text-sm transition-colors"
+                  class="w-8 h-8 rounded bg-mist hover:bg-slate/20 text-ink font-bold text-sm transition-colors duration-150
+                         focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
+                  aria-label="Increase nonce for {index === 0 ? 'Genesis block' : 'Block ' + (index + 1)}"
                 >
                   +
                 </button>
@@ -233,9 +241,10 @@
             <div class="mb-3">
               <div class="block text-xs font-medium text-slate mb-1">Previous Hash</div>
               <div
-                class="hash-output text-[10px] font-mono break-all py-2 px-2"
+                class="hash-output text-[10px] font-mono break-all py-2 px-2 transition-colors duration-200"
                 class:text-emerald={block.isValid}
                 class:text-rose={!block.isValid}
+                aria-label="Previous hash: {block.previousHash.slice(0, 32)} truncated"
               >
                 {block.previousHash.slice(0, 32)}...
               </div>
@@ -244,16 +253,23 @@
             <!-- Current Hash -->
             <div class="mb-3">
               <div class="block text-xs font-medium text-slate mb-1">Current Hash</div>
-              <div class="hash-output text-[10px] font-mono break-all py-2 px-2">
+              <div class="hash-output text-[10px] font-mono break-all py-2 px-2" aria-label="Current hash: {block.currentHash.slice(0, 32)} truncated">
                 {block.currentHash.slice(0, 32)}...
               </div>
             </div>
 
+            <!-- Hidden status for screen readers -->
+            <span id="block-status-{block.id}" class="sr-only">
+              This block is currently {block.isValid ? 'valid' : 'invalid'}. Edit the data or nonce to see how it affects the chain.
+            </span>
+
             <!-- Reset button for modified blocks -->
             {#if block.data !== block.originalData || block.nonce !== block.originalNonce}
               <button
-                class="w-full text-xs text-cobalt hover:text-cobalt/80 font-medium mt-1"
+                class="w-full text-xs text-cobalt hover:text-cobalt/80 font-medium mt-1 py-1
+                       focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1 rounded transition-colors duration-150"
                 onclick={() => resetBlock(index)}
+                aria-label="Reset {index === 0 ? 'Genesis block' : 'Block ' + (index + 1)} to original values"
               >
                 Reset this block
               </button>
@@ -262,10 +278,10 @@
 
           <!-- Chain Link Arrow -->
           {#if index < blocks.length - 1}
-            <div class="flex items-center px-2">
+            <div class="flex items-center px-1 sm:px-2" aria-hidden="true">
               <div class="flex flex-col items-center">
                 <svg
-                  class="w-8 h-8 transition-colors duration-200"
+                  class="w-6 h-6 sm:w-8 sm:h-8 transition-colors duration-200"
                   class:text-emerald={blocks[index + 1].isValid}
                   class:text-rose={!blocks[index + 1].isValid}
                   fill="none"
@@ -290,36 +306,36 @@
   </div>
 
   <!-- Learning Prompts -->
-  <div class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20 mb-6">
+  <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20 mb-6" aria-label="Learning prompts">
     <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
     <ul class="text-sm text-slate space-y-2">
       <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
         <span>Edit Block 2's data and observe the chain status. Which blocks become invalid?</span>
       </li>
       <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
         <span>Now edit Block 3. Does Block 2 become invalid?</span>
       </li>
       <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
         <span>Reset the chain and try editing only the Genesis block. What happens to all other blocks?</span>
       </li>
     </ul>
-  </div>
+  </aside>
 
   <!-- Explanation -->
-  <div class="grid md:grid-cols-2 gap-4">
-    <div class="p-4 bg-emerald/5 rounded-lg border border-emerald/20">
+  <div class="grid sm:grid-cols-2 gap-4">
+    <aside class="p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label="Why chains are tamper-evident">
       <h3 class="text-sm font-semibold text-emerald mb-2">Why Chains are Tamper-Evident</h3>
       <p class="text-sm text-slate leading-relaxed">
         Each block stores the previous block's hash. If you change any data in an earlier block,
         its hash changes. But the next block still stores the old hash, creating a mismatch.
         This "broken link" proves tampering occurred.
       </p>
-    </div>
+    </aside>
 
-    <div class="p-4 bg-amber/5 rounded-lg border border-amber/20">
+    <aside class="p-4 bg-amber/5 rounded-lg border border-amber/20" aria-label="The cascade effect">
       <h3 class="text-sm font-semibold text-amber mb-2">The Cascade Effect</h3>
       <p class="text-sm text-slate leading-relaxed">
         When one block becomes invalid, every block after it also becomes invalid. To hide tampering,
@@ -327,6 +343,6 @@
         <GlossaryTooltip term="proof of work">proof of work</GlossaryTooltip>, this becomes
         computationally impractical.
       </p>
-    </div>
+    </aside>
   </div>
-</div>
+</section>

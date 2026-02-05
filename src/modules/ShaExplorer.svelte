@@ -47,13 +47,9 @@
       });
     }
   });
-
-  function toggleComparisonMode() {
-    comparisonMode = !comparisonMode;
-  }
 </script>
 
-<div class="sha-explorer">
+<section class="sha-explorer" aria-label="SHA-256 Explorer">
   <!-- Header -->
   <div class="mb-8">
     <h2 class="text-2xl font-semibold text-ink mb-3">SHA-256 Explorer</h2>
@@ -65,24 +61,34 @@
   </div>
 
   <!-- Mode Toggle -->
-  <div class="flex gap-3 mb-6">
+  <div class="flex gap-3 mb-6" role="tablist" aria-label="Explorer mode">
     <button
-      class="px-4 py-2 rounded-lg font-medium transition-colors duration-150"
+      class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
       class:bg-cobalt={!comparisonMode}
       class:text-white={!comparisonMode}
+      class:shadow-md={!comparisonMode}
       class:bg-mist={comparisonMode}
       class:text-slate={comparisonMode}
       onclick={() => comparisonMode = false}
+      role="tab"
+      aria-selected={!comparisonMode}
+      aria-controls="panel-live-hashing"
+      id="tab-live-hashing"
     >
       Live Hashing
     </button>
     <button
-      class="px-4 py-2 rounded-lg font-medium transition-colors duration-150"
+      class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
       class:bg-cobalt={comparisonMode}
       class:text-white={comparisonMode}
+      class:shadow-md={comparisonMode}
       class:bg-mist={!comparisonMode}
       class:text-slate={!comparisonMode}
       onclick={() => comparisonMode = true}
+      role="tab"
+      aria-selected={comparisonMode}
+      aria-controls="panel-avalanche"
+      id="tab-avalanche"
     >
       Avalanche Effect
     </button>
@@ -90,162 +96,171 @@
 
   {#if !comparisonMode}
     <!-- Single Input Mode -->
-    <div class="card mb-6">
-      <label for="hash-input" class="block text-sm font-medium text-ink mb-2">
-        Enter any text
-      </label>
-      <textarea
-        id="hash-input"
-        bind:value={input}
-        placeholder="Type something here..."
-        rows="3"
-        class="input-field resize-none"
-      ></textarea>
-    </div>
+    <div id="panel-live-hashing" role="tabpanel" aria-labelledby="tab-live-hashing" class="animate-fade-in">
+      <div class="card mb-6">
+        <label for="hash-input" class="block text-sm font-medium text-ink mb-2">
+          Enter any text
+        </label>
+        <textarea
+          id="hash-input"
+          bind:value={input}
+          placeholder="Type something here..."
+          rows="3"
+          class="input-field resize-none"
+          aria-describedby="hash-input-help"
+        ></textarea>
+        <p id="hash-input-help" class="sr-only">Type any text to see its SHA-256 hash generated in real time below.</p>
+      </div>
 
-    <div class="card">
-      <HashDisplay {hash} label="SHA-256 Hash" />
-    </div>
+      <div class="card" aria-live="polite">
+        <HashDisplay {hash} label="SHA-256 Hash" />
+      </div>
 
-    <!-- Learning Prompts -->
-    <div class="mt-6 p-4 bg-cobalt/5 rounded-lg border border-cobalt/20">
-      <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
-      <ul class="text-sm text-slate space-y-1">
-        <li>Type a short word and observe the hash.</li>
-        <li>Add a single character. Notice how the entire hash changes.</li>
-        <li>Try a very long sentence. The hash is still 64 characters.</li>
-      </ul>
+      <!-- Learning Prompts -->
+      <aside class="mt-6 p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label="Learning prompts">
+        <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
+        <ul class="text-sm text-slate space-y-1">
+          <li>Type a short word and observe the hash.</li>
+          <li>Add a single character. Notice how the entire hash changes.</li>
+          <li>Try a very long sentence. The hash is still 64 characters.</li>
+        </ul>
+      </aside>
     </div>
 
   {:else}
     <!-- Comparison Mode for Avalanche Effect -->
-    <div class="mb-4">
-      <p class="text-slate text-sm leading-relaxed">
-        The <GlossaryTooltip term="avalanche effect">avalanche effect</GlossaryTooltip> means
-        that even a tiny change in input produces a completely different hash.
-        Compare two inputs below to see this in action.
-      </p>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-4 mb-6">
-      <!-- Input 1 -->
-      <div class="card">
-        <label for="input-1" class="block text-sm font-medium text-ink mb-2">
-          Input 1
-        </label>
-        <textarea
-          id="input-1"
-          bind:value={input1}
-          placeholder="First input..."
-          rows="2"
-          class="input-field resize-none"
-        ></textarea>
+    <div id="panel-avalanche" role="tabpanel" aria-labelledby="tab-avalanche" class="animate-fade-in">
+      <div class="mb-4">
+        <p class="text-slate text-sm leading-relaxed">
+          The <GlossaryTooltip term="avalanche effect">avalanche effect</GlossaryTooltip> means
+          that even a tiny change in input produces a completely different hash.
+          Compare two inputs below to see this in action.
+        </p>
       </div>
 
-      <!-- Input 2 -->
-      <div class="card">
-        <label for="input-2" class="block text-sm font-medium text-ink mb-2">
-          Input 2
-        </label>
-        <textarea
-          id="input-2"
-          bind:value={input2}
-          placeholder="Second input..."
-          rows="2"
-          class="input-field resize-none"
-        ></textarea>
-      </div>
-    </div>
-
-    <!-- Hash Comparison -->
-    <div class="grid md:grid-cols-2 gap-4 mb-6">
-      <div class="card">
-        <HashDisplay hash={hash1} label="Hash of Input 1" />
-      </div>
-      <div class="card">
-        <HashDisplay hash={hash2} {differences} label="Hash of Input 2 (differences highlighted)" />
-      </div>
-    </div>
-
-    <!-- Statistics -->
-    {#if hash1 && hash2}
-      <div class="card mb-6">
-        <h3 class="text-sm font-semibold text-ink mb-3">Comparison Statistics</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="text-center p-3 bg-paper rounded-lg border border-mist">
-            <div class="text-2xl font-bold text-cobalt">{differingBitCount}</div>
-            <div class="text-xs text-slate">Bits Changed</div>
-          </div>
-          <div class="text-center p-3 bg-paper rounded-lg border border-mist">
-            <div class="text-2xl font-bold text-cobalt">256</div>
-            <div class="text-xs text-slate">Total Bits</div>
-          </div>
-          <div class="text-center p-3 bg-paper rounded-lg border border-mist">
-            <div class="text-2xl font-bold text-cobalt">
-              {((differingBitCount / 256) * 100).toFixed(1)}%
-            </div>
-            <div class="text-xs text-slate">Bits Changed</div>
-          </div>
-          <div class="text-center p-3 bg-paper rounded-lg border border-mist">
-            <div class="text-2xl font-bold text-cobalt">
-              {differences.filter(d => d).length}
-            </div>
-            <div class="text-xs text-slate">Hex Chars Changed</div>
-          </div>
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <!-- Input 1 -->
+        <div class="card">
+          <label for="input-1" class="block text-sm font-medium text-ink mb-2">
+            Input 1
+          </label>
+          <textarea
+            id="input-1"
+            bind:value={input1}
+            placeholder="First input..."
+            rows="2"
+            class="input-field resize-none"
+          ></textarea>
         </div>
 
-        <!-- Binary View Toggle -->
-        <div class="mt-4">
-          <button
-            class="btn-secondary text-sm"
-            onclick={() => showBinary = !showBinary}
-          >
-            {showBinary ? 'Hide' : 'Show'} Binary Representation
-          </button>
+        <!-- Input 2 -->
+        <div class="card">
+          <label for="input-2" class="block text-sm font-medium text-ink mb-2">
+            Input 2
+          </label>
+          <textarea
+            id="input-2"
+            bind:value={input2}
+            placeholder="Second input..."
+            rows="2"
+            class="input-field resize-none"
+          ></textarea>
         </div>
+      </div>
 
-        {#if showBinary}
-          <div class="mt-4 grid md:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs font-medium text-slate mb-1">Binary of Hash 1</div>
-              <div class="hash-output text-xs overflow-x-auto">
-                {hexToBinary(hash1)}
-              </div>
+      <!-- Hash Comparison -->
+      <div class="grid sm:grid-cols-2 gap-4 mb-6">
+        <div class="card">
+          <HashDisplay hash={hash1} label="Hash of Input 1" />
+        </div>
+        <div class="card">
+          <HashDisplay hash={hash2} {differences} label="Hash of Input 2 (differences highlighted)" />
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      {#if hash1 && hash2}
+        <div class="card mb-6" aria-live="polite">
+          <h3 class="text-sm font-semibold text-ink mb-3">Comparison Statistics</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
+              <div class="text-2xl font-bold text-cobalt" aria-label="{differingBitCount} bits changed">{differingBitCount}</div>
+              <div class="text-xs text-slate">Bits Changed</div>
             </div>
-            <div>
-              <div class="text-xs font-medium text-slate mb-1">Binary of Hash 2 (differences in red)</div>
-              <div class="hash-output text-xs overflow-x-auto">
-                {#each hexToBinary(hash2).split('') as bit, i}
-                  <span
-                    class:text-rose={binaryDifferences[i]}
-                    class:font-bold={binaryDifferences[i]}
-                  >{bit}</span>
-                {/each}
+            <div class="text-center p-3 bg-paper rounded-lg border border-mist">
+              <div class="text-2xl font-bold text-cobalt">256</div>
+              <div class="text-xs text-slate">Total Bits</div>
+            </div>
+            <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
+              <div class="text-2xl font-bold text-cobalt" aria-label="{((differingBitCount / 256) * 100).toFixed(1)} percent bits changed">
+                {((differingBitCount / 256) * 100).toFixed(1)}%
               </div>
+              <div class="text-xs text-slate">Bits Changed</div>
+            </div>
+            <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
+              <div class="text-2xl font-bold text-cobalt">
+                {differences.filter(d => d).length}
+              </div>
+              <div class="text-xs text-slate">Hex Chars Changed</div>
             </div>
           </div>
-        {/if}
-      </div>
-    {/if}
 
-    <!-- Learning Prompts -->
-    <div class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20">
-      <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
-      <ul class="text-sm text-slate space-y-1">
-        <li>Change just one letter in Input 2. How many bits change?</li>
-        <li>Make the inputs identical. What percentage of bits differ?</li>
-        <li>Why does this property matter for security?</li>
-      </ul>
-    </div>
+          <!-- Binary View Toggle -->
+          <div class="mt-4">
+            <button
+              class="btn-secondary text-sm"
+              onclick={() => showBinary = !showBinary}
+              aria-expanded={showBinary}
+              aria-controls="binary-view"
+            >
+              {showBinary ? 'Hide' : 'Show'} Binary Representation
+            </button>
+          </div>
 
-    <!-- Explanation -->
-    <div class="mt-6 p-4 bg-emerald/5 rounded-lg border border-emerald/20">
-      <h3 class="text-sm font-semibold text-emerald mb-2">Why this matters</h3>
-      <p class="text-sm text-slate leading-relaxed">
-        The avalanche effect is crucial for security. If similar inputs produced similar hashes,
-        attackers could guess inputs by comparing outputs. With SHA-256, about 50% of bits
-        change with any input modification, making such attacks impractical.
-      </p>
+          {#if showBinary}
+            <div id="binary-view" class="mt-4 grid sm:grid-cols-2 gap-4 animate-fade-in">
+              <div>
+                <div class="text-xs font-medium text-slate mb-1">Binary of Hash 1</div>
+                <div class="hash-output text-xs overflow-x-auto">
+                  {hexToBinary(hash1)}
+                </div>
+              </div>
+              <div>
+                <div class="text-xs font-medium text-slate mb-1">Binary of Hash 2 (differences in red)</div>
+                <div class="hash-output text-xs overflow-x-auto" aria-label="Binary representation with differences highlighted in red">
+                  {#each hexToBinary(hash2).split('') as bit, i}
+                    <span
+                      class="transition-colors duration-150"
+                      class:text-rose={binaryDifferences[i]}
+                      class:font-bold={binaryDifferences[i]}
+                    >{bit}</span>
+                  {/each}
+                </div>
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Learning Prompts -->
+      <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label="Learning prompts">
+        <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
+        <ul class="text-sm text-slate space-y-1">
+          <li>Change just one letter in Input 2. How many bits change?</li>
+          <li>Make the inputs identical. What percentage of bits differ?</li>
+          <li>Why does this property matter for security?</li>
+        </ul>
+      </aside>
+
+      <!-- Explanation -->
+      <aside class="mt-6 p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label="Why the avalanche effect matters">
+        <h3 class="text-sm font-semibold text-emerald mb-2">Why this matters</h3>
+        <p class="text-sm text-slate leading-relaxed">
+          The avalanche effect is crucial for security. If similar inputs produced similar hashes,
+          attackers could guess inputs by comparing outputs. With SHA-256, about 50% of bits
+          change with any input modification, making such attacks impractical.
+        </p>
+      </aside>
     </div>
   {/if}
-</div>
+</section>
