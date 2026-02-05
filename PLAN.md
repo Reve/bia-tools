@@ -115,6 +115,11 @@
 14. Collect feedback and iterate on explanations.
 15. Finalize static build output and hosting instructions.
 
+#### Phase 5 Artifacts (This Repo)
+- QA checklist: `QA_RELEASE_CHECKLIST.md`.
+- Usability feedback template: `FEEDBACK_LOG.md`.
+- Hosting instructions: `README.md`.
+
 
 ## Svelte Implementation Outline
 ### Project Structure
