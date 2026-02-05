@@ -60,9 +60,6 @@
 
       prevHash = block.currentHash;
     }
-
-    // Trigger reactivity
-    blocks = [...blocks];
   }
 
   function resetChain() {
