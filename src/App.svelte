@@ -1,5 +1,7 @@
 <script>
   import ShaExplorer from './modules/ShaExplorer.svelte';
+  import BlockAnatomy from './modules/BlockAnatomy.svelte';
+  import BlockchainIntegrity from './modules/BlockchainIntegrity.svelte';
   import GlossaryTooltip from './components/GlossaryTooltip.svelte';
 
   let currentModule = $state(1);
@@ -8,8 +10,8 @@
   // Module data for the progress indicator
   const modules = [
     { id: 1, title: 'SHA Basics', available: true },
-    { id: 2, title: 'Block Anatomy', available: false },
-    { id: 3, title: 'Blockchain Integrity', available: false },
+    { id: 2, title: 'Block Anatomy', available: true },
+    { id: 3, title: 'Blockchain Integrity', available: true },
     { id: 4, title: 'Proof of Work', available: false }
   ];
 </script>
@@ -128,8 +130,126 @@
           <p class="text-sm text-slate">Tiny input changes cause massive hash differences.</p>
         </div>
       </div>
+    {:else if currentModule === 2}
+      <!-- Module 2: Block Anatomy -->
+      <div class="mb-8">
+        <!-- Learning Objectives -->
+        <div class="card mb-8">
+          <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+              <span class="text-slate">Identify the fields that make up a <GlossaryTooltip term="block">block</GlossaryTooltip>: data, <GlossaryTooltip term="nonce">nonce</GlossaryTooltip>, <GlossaryTooltip term="previous hash">previous hash</GlossaryTooltip>, current hash.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+              <span class="text-slate">Explain how a block's <GlossaryTooltip term="hash">hash</GlossaryTooltip> is computed from its contents.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+              <span class="text-slate">Understand why changing any field changes the block hash.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Block Anatomy Module -->
+        <BlockAnatomy />
+      </div>
+
+      <!-- Key Concepts Summary -->
+      <div class="mt-8 grid md:grid-cols-3 gap-4">
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Data Container</h3>
+          <p class="text-sm text-slate">Blocks bundle data with metadata for organization.</p>
+        </div>
+
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Hash Links</h3>
+          <p class="text-sm text-slate">Previous hash field creates chain connections.</p>
+        </div>
+
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Hash Recomputes</h3>
+          <p class="text-sm text-slate">Any field change updates the entire block hash.</p>
+        </div>
+      </div>
+
+    {:else if currentModule === 3}
+      <!-- Module 3: Blockchain Integrity -->
+      <div class="mb-8">
+        <!-- Learning Objectives -->
+        <div class="card mb-8">
+          <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+              <span class="text-slate">Describe how blocks link through <GlossaryTooltip term="previous hash">previous hashes</GlossaryTooltip>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+              <span class="text-slate">Explain why tampering with one block invalidates later blocks.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+              <span class="text-slate">Identify valid vs. invalid blocks in a <GlossaryTooltip term="blockchain">blockchain</GlossaryTooltip>.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Blockchain Integrity Module -->
+        <BlockchainIntegrity />
+      </div>
+
+      <!-- Key Concepts Summary -->
+      <div class="mt-8 grid md:grid-cols-3 gap-4">
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Chain Links</h3>
+          <p class="text-sm text-slate">Each block stores the previous block's hash.</p>
+        </div>
+
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-rose/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-rose" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Tamper-Evident</h3>
+          <p class="text-sm text-slate">Changing data breaks the chain verification.</p>
+        </div>
+
+        <div class="card text-center">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber/10 flex items-center justify-center">
+            <svg class="w-6 h-6 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-ink mb-1">Cascade Effect</h3>
+          <p class="text-sm text-slate">Invalid blocks invalidate all subsequent blocks.</p>
+        </div>
+      </div>
+
     {:else}
-      <!-- Placeholder for other modules -->
+      <!-- Placeholder for Module 4 (Proof of Work) -->
       <div class="card text-center py-12">
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-mist flex items-center justify-center">
           <svg class="w-8 h-8 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24">
