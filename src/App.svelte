@@ -2,6 +2,7 @@
   import ShaExplorer from './modules/ShaExplorer.svelte';
   import BlockAnatomy from './modules/BlockAnatomy.svelte';
   import BlockchainIntegrity from './modules/BlockchainIntegrity.svelte';
+  import ProofOfWork from './modules/ProofOfWork.svelte';
   import GlossaryTooltip from './components/GlossaryTooltip.svelte';
 
   let currentModule = $state(1);
@@ -12,7 +13,7 @@
     { id: 1, title: 'SHA Basics', available: true },
     { id: 2, title: 'Block Anatomy', available: true },
     { id: 3, title: 'Blockchain Integrity', available: true },
-    { id: 4, title: 'Proof of Work', available: false }
+    { id: 4, title: 'Proof of Work', available: true }
   ];
 
   function handleProgressKeydown(event, module) {
@@ -315,33 +316,70 @@
         </section>
       </div>
 
-    {:else}
-      <!-- Placeholder for Module 4 (Proof of Work) -->
+    {:else if currentModule === 4}
+      <!-- Module 4: Proof of Work -->
       <div
         id="module-panel-4"
         role="tabpanel"
         aria-labelledby="module-tab-4"
         class="animate-fade-in"
       >
-        <div class="card text-center py-12">
-          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-mist flex items-center justify-center" aria-hidden="true">
-            <svg class="w-8 h-8 text-slate" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </div>
-          <h2 class="text-xl font-semibold text-ink mb-2">
-            {modules[currentModule - 1]?.title || 'Module'} Coming Soon
-          </h2>
-          <p class="text-slate max-w-md mx-auto">
-            This module is under development. Check back soon for more interactive learning content.
-          </p>
-          <button
-            class="btn-primary mt-4"
-            onclick={() => currentModule = 1}
-          >
-            Return to SHA Basics
-          </button>
+        <div class="mb-8">
+          <!-- Learning Objectives -->
+          <section class="card mb-8" aria-label="Learning objectives for Proof of Work">
+            <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
+                <span class="text-slate">Define <GlossaryTooltip term="proof of work">proof of work</GlossaryTooltip> as a search for a hash with specific properties.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
+                <span class="text-slate">Explain <GlossaryTooltip term="difficulty">difficulty</GlossaryTooltip> as the number of leading zeros required.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
+                <span class="text-slate">Describe why proof of work makes tampering costly.</span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- Proof of Work Module -->
+          <ProofOfWork />
         </div>
+
+        <!-- Key Concepts Summary -->
+        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label="Key concepts">
+          <div class="card text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-ink mb-1">Nonce Search</h3>
+            <p class="text-sm text-slate">Miners try nonces until the hash meets the difficulty target.</p>
+          </div>
+
+          <div class="card text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-ink mb-1">Exponential Cost</h3>
+            <p class="text-sm text-slate">Each extra zero roughly multiplies the work needed by 16.</p>
+          </div>
+
+          <div class="card text-center sm:col-span-2 md:col-span-1">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
+              <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-ink mb-1">Tamper Protection</h3>
+            <p class="text-sm text-slate">Rewriting history requires redoing all proof of work.</p>
+          </div>
+        </section>
       </div>
     {/if}
   </main>

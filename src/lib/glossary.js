@@ -40,6 +40,10 @@ export const glossaryTerms = {
     term: 'Immutability',
     definition: 'The practical difficulty of changing past data once it is recorded in a blockchain.'
   },
+  'mining': {
+    term: 'Mining',
+    definition: 'The process of searching for a nonce that produces a hash meeting the proof-of-work difficulty requirement.'
+  },
   'nonce': {
     term: 'Nonce',
     definition: 'A number used once, typically adjusted to find a hash that meets proof-of-work requirements.'
