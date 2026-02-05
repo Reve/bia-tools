@@ -34,31 +34,41 @@
   });
 
   async function computeChain() {
-    let prevHash = GENESIS_PREVIOUS_HASH;
-
+    // First pass: compute all hashes based on current data
+    // We need to compute hashes in order since each depends on the previous
+    const computedHashes = [];
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
-      const expectedPrevHash = i === 0 ? GENESIS_PREVIOUS_HASH : blocks[i - 1].currentHash;
+      // Use stored previousHash if it exists, otherwise compute from previous block
+      const prevHash = block.previousHash || (i === 0 ? GENESIS_PREVIOUS_HASH : computedHashes[i - 1]);
+      const blockContent = `${block.data}${block.nonce}${prevHash}`;
+      computedHashes[i] = await sha256(blockContent);
+    }
 
-      // Set previous hash
-      block.previousHash = expectedPrevHash;
+    // Second pass: set previousHash only if not already set, and determine validity
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
 
-      // Compute current hash
+      // Only set previousHash on initial computation (when empty)
+      // This preserves the original chain links
+      if (!block.previousHash) {
+        block.previousHash = i === 0 ? GENESIS_PREVIOUS_HASH : computedHashes[i - 1];
+      }
+
+      // Compute current hash based on stored previousHash
       const blockContent = `${block.data}${block.nonce}${block.previousHash}`;
       block.currentHash = await sha256(blockContent);
 
-      // Determine validity - block is valid if its stored previousHash matches what it should be
-      // For simplicity in this demo, validity cascades: if a previous block is invalid, this one is too
+      // Determine validity
       if (i === 0) {
         block.isValid = true; // Genesis block is always valid
       } else {
-        // Check if the previous block's current hash matches what we expect
         const prevBlock = blocks[i - 1];
-        // If any block before this has been tampered, mark invalid
+        // Block is valid if:
+        // 1. Previous block is valid, AND
+        // 2. Previous block's current hash matches this block's stored previousHash
         block.isValid = prevBlock.isValid && (prevBlock.currentHash === block.previousHash);
       }
-
-      prevHash = block.currentHash;
     }
   }
 
