@@ -5,6 +5,13 @@
 
   let showTooltip = $state(false);
   let glossaryEntry = $derived(getGlossaryTerm(term));
+
+  function handleKeydown(event) {
+    if (event.key === 'Escape' && showTooltip) {
+      showTooltip = false;
+      event.stopPropagation();
+    }
+  }
 </script>
 
 <span
@@ -13,11 +20,14 @@
   onmouseleave={() => showTooltip = false}
   onfocus={() => showTooltip = true}
   onblur={() => showTooltip = false}
+  onkeydown={handleKeydown}
   tabindex="0"
   role="button"
-  aria-describedby={glossaryEntry ? `tooltip-${term.replace(/\s+/g, '-')}` : undefined}
+  aria-describedby={showTooltip && glossaryEntry ? `tooltip-${term.replace(/\s+/g, '-')}` : undefined}
+  aria-label="Glossary term: {term}"
 >
-  <span class="border-b border-dashed border-cobalt text-cobalt cursor-help">
+  <span class="border-b border-dashed border-cobalt text-cobalt cursor-help
+               hover:border-cobalt/70 focus:border-cobalt/70 transition-colors duration-150">
     {@render children()}
   </span>
 
@@ -27,7 +37,7 @@
       role="tooltip"
       class="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3
              bg-ink text-white text-sm rounded-lg shadow-lg
-             transition-opacity duration-150"
+             animate-tooltip-in"
     >
       <div class="font-semibold mb-1">{glossaryEntry.term}</div>
       <div class="text-white/90 leading-snug">{glossaryEntry.definition}</div>

@@ -39,23 +39,28 @@
 
 <div
   class="block-card card transition-all duration-200 {isValid ? 'border-emerald bg-emerald/5' : 'border-rose bg-rose/5'}"
+  role="region"
+  aria-label="Block {blockNumber}: {isValid ? 'Valid' : 'Invalid'}"
 >
   <!-- Block Header -->
   <div class="flex items-center justify-between mb-4">
     <h3 class="text-lg font-semibold text-ink flex items-center gap-2">
-      <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+      <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors duration-200"
         class:bg-emerald={isValid}
         class:bg-rose={!isValid}
         class:text-white={true}
+        aria-hidden="true"
       >
         {blockNumber}
       </span>
       Block {blockNumber}
     </h3>
     <span
-      class="text-xs font-medium px-2 py-1 rounded"
+      class="text-xs font-medium px-2 py-1 rounded transition-colors duration-200"
       class:badge-valid={isValid}
       class:badge-invalid={!isValid}
+      role="status"
+      aria-label="Block is {isValid ? 'valid' : 'invalid'}"
     >
       {isValid ? 'Valid' : 'Invalid'}
     </span>
@@ -75,7 +80,7 @@
         class="input-field resize-none text-sm"
       ></textarea>
     {:else}
-      <div class="input-field text-sm bg-mist/30 cursor-not-allowed">{data || '(empty)'}</div>
+      <div class="input-field text-sm bg-mist/30 cursor-not-allowed" aria-label="Data: {data || '(empty)'}">{data || '(empty)'}</div>
     {/if}
   </div>
 
@@ -96,21 +101,25 @@
         <button
           type="button"
           onclick={decrementNonce}
-          class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors"
+          class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors duration-150
+                 focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
           disabled={nonce <= 0}
+          aria-label="Decrease nonce"
         >
           -
         </button>
         <button
           type="button"
           onclick={incrementNonce}
-          class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors"
+          class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors duration-150
+                 focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
+          aria-label="Increase nonce"
         >
           +
         </button>
       </div>
     {:else}
-      <div class="input-field text-sm font-mono bg-mist/30 cursor-not-allowed">{nonce}</div>
+      <div class="input-field text-sm font-mono bg-mist/30 cursor-not-allowed" aria-label="Nonce: {nonce}">{nonce}</div>
     {/if}
   </div>
 
@@ -120,9 +129,10 @@
       <label class="block text-sm font-medium text-ink mb-1">
         <GlossaryTooltip term="previous hash">Previous Hash</GlossaryTooltip>
       </label>
-      <div class="hash-output text-xs font-mono break-all"
+      <div class="hash-output text-xs font-mono break-all transition-colors duration-200"
         class:text-emerald={isValid}
         class:text-rose={!isValid}
+        aria-label="Previous hash value"
       >
         {previousHash}
       </div>
@@ -134,7 +144,7 @@
     <label class="block text-sm font-medium text-ink mb-1">
       <GlossaryTooltip term="hash">Current Hash</GlossaryTooltip>
     </label>
-    <div class="hash-output text-xs font-mono break-all">
+    <div class="hash-output text-xs font-mono break-all" aria-live="polite" aria-label="Current hash value">
       {currentHash || 'Computing...'}
     </div>
   </div>
