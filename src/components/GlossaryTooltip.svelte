@@ -1,10 +1,13 @@
 <script>
   import { getGlossaryTerm } from '../lib/glossary.js';
+  import { language, translate } from '../lib/i18n.js';
 
   let { term, children } = $props();
 
   let showTooltip = $state(false);
-  let glossaryEntry = $derived(getGlossaryTerm(term));
+  let glossaryEntry = $derived(getGlossaryTerm(term, $language));
+
+  const t = (key, vars) => translate($language, key, vars);
 
   function handleKeydown(event) {
     if (event.key === 'Escape' && showTooltip) {
@@ -24,11 +27,15 @@
   tabindex="0"
   role="button"
   aria-describedby={showTooltip && glossaryEntry ? `tooltip-${term.replace(/\s+/g, '-')}` : undefined}
-  aria-label="Glossary term: {term}"
+  aria-label={t('glossary.termLabel', { term: glossaryEntry?.term ?? term })}
 >
   <span class="border-b border-dashed border-cobalt text-cobalt cursor-help
                hover:border-cobalt/70 focus:border-cobalt/70 transition-colors duration-150">
-    {@render children()}
+    {#if children}
+      {@render children()}
+    {:else if glossaryEntry}
+      {glossaryEntry.term}
+    {/if}
   </span>
 
   {#if showTooltip && glossaryEntry}

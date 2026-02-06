@@ -3,18 +3,20 @@
   import BlockAnatomy from './modules/BlockAnatomy.svelte';
   import BlockchainIntegrity from './modules/BlockchainIntegrity.svelte';
   import ProofOfWork from './modules/ProofOfWork.svelte';
-  import GlossaryTooltip from './components/GlossaryTooltip.svelte';
+  import { language, languageOptions, translate } from './lib/i18n.js';
 
   let currentModule = $state(1);
   const totalModules = 4;
 
+  const t = (key, vars) => translate($language, key, vars);
+
   // Module data for the progress indicator
-  const modules = [
-    { id: 1, title: 'SHA Basics', available: true },
-    { id: 2, title: 'Block Anatomy', available: true },
-    { id: 3, title: 'Blockchain Integrity', available: true },
-    { id: 4, title: 'Proof of Work', available: true }
-  ];
+  let modules = $derived([
+    { id: 1, title: t('app.moduleTitles.shaBasics'), available: true },
+    { id: 2, title: t('app.moduleTitles.blockAnatomy'), available: true },
+    { id: 3, title: t('app.moduleTitles.blockchainIntegrity'), available: true },
+    { id: 4, title: t('app.moduleTitles.proofOfWork'), available: true }
+  ]);
 
   function handleProgressKeydown(event, module) {
     if (!module.available) return;
@@ -51,7 +53,7 @@
     class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2
            focus:bg-cobalt focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg"
   >
-    Skip to main content
+    {t('common.skipToContent')}
   </a>
 
   <!-- Header -->
@@ -60,21 +62,37 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-lg sm:text-xl font-semibold text-ink">
-            Blockchain & SHA Learning Tools
+            {t('app.title')}
           </h1>
-          <p class="text-xs sm:text-sm text-slate">Interactive cryptography fundamentals</p>
+          <p class="text-xs sm:text-sm text-slate">{t('app.subtitle')}</p>
         </div>
         <div class="text-xs sm:text-sm text-slate" aria-live="polite">
-          Module {currentModule} of {totalModules}
+          {t('common.moduleStatus', { current: currentModule, total: totalModules })}
+        </div>
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-slate">
+          <label for="language-select" class="font-medium text-ink">
+            {t('languageLabel')}
+          </label>
+          <select
+            id="language-select"
+            class="border border-mist rounded-md px-2 py-1 bg-white text-ink text-xs sm:text-sm"
+            bind:value={$language}
+          >
+            {#each languageOptions as option}
+              <option value={option.value}>
+                {t(`languages.${option.value}`)}
+              </option>
+            {/each}
+          </select>
         </div>
       </div>
     </div>
   </header>
 
   <!-- Progress Bar / Tab Navigation -->
-  <nav class="border-b border-mist bg-white" aria-label="Module navigation">
+  <nav class="border-b border-mist bg-white" aria-label={t('app.moduleNavLabel')}>
     <div class="max-w-content mx-auto px-4 sm:px-6">
-      <div class="flex gap-1 py-3" role="tablist" aria-label="Learning modules">
+      <div class="flex gap-1 py-3" role="tablist" aria-label={t('app.moduleTablistLabel')}>
         {#each modules as module}
           <button
             id="module-tab-{module.id}"
@@ -86,7 +104,7 @@
             aria-selected={currentModule === module.id}
             aria-controls="module-panel-{module.id}"
             tabindex={currentModule === module.id ? 0 : -1}
-            aria-label="{module.title}{!module.available ? ' (coming soon)' : ''}"
+            aria-label={`${module.title}${!module.available ? ` (${t('common.comingSoon')})` : ''}`}
           >
             <div
               class="h-2 rounded-full transition-all duration-200"
@@ -104,7 +122,7 @@
             >
               {module.title}
               {#if !module.available}
-                <span class="text-white/60">(Coming soon)</span>
+                <span class="text-white/60">({t('common.comingSoon')})</span>
               {/if}
             </div>
           </button>
@@ -125,24 +143,24 @@
       >
         <div class="mb-8">
           <!-- Learning Objectives -->
-          <section class="card mb-8" aria-label="Learning objectives for SHA Basics">
-            <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <section class="card mb-8" aria-label={t('app.moduleObjectives.shaBasics.label')}>
+            <h3 class="text-lg font-semibold text-ink mb-3">{t('common.learningObjectives')}</h3>
             <ul class="space-y-2">
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
-                <span class="text-slate">Define a <GlossaryTooltip term="cryptographic hash">cryptographic hash</GlossaryTooltip> in plain language.</span>
+                <span class="text-slate">{t('app.moduleObjectives.shaBasics.items')[0]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
-                <span class="text-slate">Describe <GlossaryTooltip term="sha-256">SHA-256</GlossaryTooltip> outputs as <GlossaryTooltip term="fixed length">fixed-length</GlossaryTooltip> and <GlossaryTooltip term="deterministic">deterministic</GlossaryTooltip>.</span>
+                <span class="text-slate">{t('app.moduleObjectives.shaBasics.items')[1]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
-                <span class="text-slate">Explain the <GlossaryTooltip term="avalanche effect">avalanche effect</GlossaryTooltip> with a simple example.</span>
+                <span class="text-slate">{t('app.moduleObjectives.shaBasics.items')[2]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">4</span>
-                <span class="text-slate">Demonstrate how small input changes produce large output changes.</span>
+                <span class="text-slate">{t('app.moduleObjectives.shaBasics.items')[3]}</span>
               </li>
             </ul>
           </section>
@@ -152,15 +170,15 @@
         </div>
 
         <!-- Key Concepts Summary -->
-        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label="Key concepts">
+        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label={t('common.keyConcepts')}>
           <div class="card text-center">
             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
               <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Deterministic</h3>
-            <p class="text-sm text-slate">Same input always produces the same hash output.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.shaBasics.items')[0].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.shaBasics.items')[0].description}</p>
           </div>
 
           <div class="card text-center">
@@ -169,8 +187,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Fixed Length</h3>
-            <p class="text-sm text-slate">Output is always 64 hex characters, regardless of input size.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.shaBasics.items')[1].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.shaBasics.items')[1].description}</p>
           </div>
 
           <div class="card text-center sm:col-span-2 md:col-span-1">
@@ -179,8 +197,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Avalanche Effect</h3>
-            <p class="text-sm text-slate">Tiny input changes cause massive hash differences.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.shaBasics.items')[2].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.shaBasics.items')[2].description}</p>
           </div>
         </section>
       </div>
@@ -194,20 +212,20 @@
       >
         <div class="mb-8">
           <!-- Learning Objectives -->
-          <section class="card mb-8" aria-label="Learning objectives for Block Anatomy">
-            <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <section class="card mb-8" aria-label={t('app.moduleObjectives.blockAnatomy.label')}>
+            <h3 class="text-lg font-semibold text-ink mb-3">{t('common.learningObjectives')}</h3>
             <ul class="space-y-2">
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
-                <span class="text-slate">Identify the fields that make up a <GlossaryTooltip term="block">block</GlossaryTooltip>: data, <GlossaryTooltip term="nonce">nonce</GlossaryTooltip>, <GlossaryTooltip term="previous hash">previous hash</GlossaryTooltip>, current hash.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockAnatomy.items')[0]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
-                <span class="text-slate">Explain how a block's <GlossaryTooltip term="hash">hash</GlossaryTooltip> is computed from its contents.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockAnatomy.items')[1]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
-                <span class="text-slate">Understand why changing any field changes the block hash.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockAnatomy.items')[2]}</span>
               </li>
             </ul>
           </section>
@@ -217,15 +235,15 @@
         </div>
 
         <!-- Key Concepts Summary -->
-        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label="Key concepts">
+        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label={t('common.keyConcepts')}>
           <div class="card text-center">
             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
               <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Data Container</h3>
-            <p class="text-sm text-slate">Blocks bundle data with metadata for organization.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockAnatomy.items')[0].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockAnatomy.items')[0].description}</p>
           </div>
 
           <div class="card text-center">
@@ -234,8 +252,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Hash Links</h3>
-            <p class="text-sm text-slate">Previous hash field creates chain connections.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockAnatomy.items')[1].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockAnatomy.items')[1].description}</p>
           </div>
 
           <div class="card text-center sm:col-span-2 md:col-span-1">
@@ -244,8 +262,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Hash Recomputes</h3>
-            <p class="text-sm text-slate">Any field change updates the entire block hash.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockAnatomy.items')[2].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockAnatomy.items')[2].description}</p>
           </div>
         </section>
       </div>
@@ -260,20 +278,20 @@
       >
         <div class="mb-8">
           <!-- Learning Objectives -->
-          <section class="card mb-8" aria-label="Learning objectives for Blockchain Integrity">
-            <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <section class="card mb-8" aria-label={t('app.moduleObjectives.blockchainIntegrity.label')}>
+            <h3 class="text-lg font-semibold text-ink mb-3">{t('common.learningObjectives')}</h3>
             <ul class="space-y-2">
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
-                <span class="text-slate">Describe how blocks link through <GlossaryTooltip term="previous hash">previous hashes</GlossaryTooltip>.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockchainIntegrity.items')[0]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
-                <span class="text-slate">Explain why tampering with one block invalidates later blocks.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockchainIntegrity.items')[1]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
-                <span class="text-slate">Identify valid vs. invalid blocks in a <GlossaryTooltip term="blockchain">blockchain</GlossaryTooltip>.</span>
+                <span class="text-slate">{t('app.moduleObjectives.blockchainIntegrity.items')[2]}</span>
               </li>
             </ul>
           </section>
@@ -283,15 +301,15 @@
         </div>
 
         <!-- Key Concepts Summary -->
-        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label="Key concepts">
+        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label={t('common.keyConcepts')}>
           <div class="card text-center">
             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald/10 flex items-center justify-center" aria-hidden="true">
               <svg class="w-6 h-6 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Chain Links</h3>
-            <p class="text-sm text-slate">Each block stores the previous block's hash.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[0].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[0].description}</p>
           </div>
 
           <div class="card text-center">
@@ -300,8 +318,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Tamper-Evident</h3>
-            <p class="text-sm text-slate">Changing data breaks the chain verification.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[1].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[1].description}</p>
           </div>
 
           <div class="card text-center sm:col-span-2 md:col-span-1">
@@ -310,8 +328,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Cascade Effect</h3>
-            <p class="text-sm text-slate">Invalid blocks invalidate all subsequent blocks.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[2].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.blockchainIntegrity.items')[2].description}</p>
           </div>
         </section>
       </div>
@@ -326,20 +344,20 @@
       >
         <div class="mb-8">
           <!-- Learning Objectives -->
-          <section class="card mb-8" aria-label="Learning objectives for Proof of Work">
-            <h3 class="text-lg font-semibold text-ink mb-3">Learning Objectives</h3>
+          <section class="card mb-8" aria-label={t('app.moduleObjectives.proofOfWork.label')}>
+            <h3 class="text-lg font-semibold text-ink mb-3">{t('common.learningObjectives')}</h3>
             <ul class="space-y-2">
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
-                <span class="text-slate">Define <GlossaryTooltip term="proof of work">proof of work</GlossaryTooltip> as a search for a hash with specific properties.</span>
+                <span class="text-slate">{t('app.moduleObjectives.proofOfWork.items')[0]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
-                <span class="text-slate">Explain <GlossaryTooltip term="difficulty">difficulty</GlossaryTooltip> as the number of leading zeros required.</span>
+                <span class="text-slate">{t('app.moduleObjectives.proofOfWork.items')[1]}</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
-                <span class="text-slate">Describe why proof of work makes tampering costly.</span>
+                <span class="text-slate">{t('app.moduleObjectives.proofOfWork.items')[2]}</span>
               </li>
             </ul>
           </section>
@@ -349,15 +367,15 @@
         </div>
 
         <!-- Key Concepts Summary -->
-        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label="Key concepts">
+        <section class="mt-8 grid sm:grid-cols-2 md:grid-cols-3 gap-4" aria-label={t('common.keyConcepts')}>
           <div class="card text-center">
             <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cobalt/10 flex items-center justify-center" aria-hidden="true">
               <svg class="w-6 h-6 text-cobalt" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Nonce Search</h3>
-            <p class="text-sm text-slate">Miners try nonces until the hash meets the difficulty target.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.proofOfWork.items')[0].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.proofOfWork.items')[0].description}</p>
           </div>
 
           <div class="card text-center">
@@ -366,8 +384,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Exponential Cost</h3>
-            <p class="text-sm text-slate">Each extra zero roughly multiplies the work needed by 16.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.proofOfWork.items')[1].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.proofOfWork.items')[1].description}</p>
           </div>
 
           <div class="card text-center sm:col-span-2 md:col-span-1">
@@ -376,8 +394,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h3 class="font-semibold text-ink mb-1">Tamper Protection</h3>
-            <p class="text-sm text-slate">Rewriting history requires redoing all proof of work.</p>
+            <h3 class="font-semibold text-ink mb-1">{t('app.moduleKeyConcepts.proofOfWork.items')[2].title}</h3>
+            <p class="text-sm text-slate">{t('app.moduleKeyConcepts.proofOfWork.items')[2].description}</p>
           </div>
         </section>
       </div>
@@ -388,8 +406,8 @@
   <footer class="border-t border-mist bg-white mt-8">
     <div class="max-w-content mx-auto px-4 sm:px-6 py-4">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-slate">
-        <div>Blockchain & SHA Learning Tools</div>
-        <div>Runs entirely offline in your browser</div>
+        <div>{t('app.title')}</div>
+        <div>{t('app.footerOffline')}</div>
       </div>
     </div>
   </footer>

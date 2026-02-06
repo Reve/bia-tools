@@ -2,6 +2,7 @@
   import { sha256, compareHashes, countDifferingBits, hexToBinary, compareBinaryStrings } from '../lib/hash.js';
   import HashDisplay from '../components/HashDisplay.svelte';
   import GlossaryTooltip from '../components/GlossaryTooltip.svelte';
+  import { language, translate } from '../lib/i18n.js';
 
   let input = $state('');
   let hash = $state('');
@@ -16,6 +17,8 @@
   let binaryDifferences = $state([]);
   let differingBitCount = $state(0);
   let showBinary = $state(false);
+
+  const t = (key, vars) => translate($language, key, vars);
 
   // Reactive hash computation for single input
   $effect(() => {
@@ -49,19 +52,21 @@
   });
 </script>
 
-<section class="sha-explorer" aria-label="SHA-256 Explorer">
+<section class="sha-explorer" aria-label={t('shaExplorer.title')}>
   <!-- Header -->
   <div class="mb-8">
-    <h2 class="text-2xl font-semibold text-ink mb-3">SHA-256 Explorer</h2>
+    <h2 class="text-2xl font-semibold text-ink mb-3">{t('shaExplorer.title')}</h2>
     <p class="text-slate leading-relaxed max-w-2xl">
-      A <GlossaryTooltip term="hash">hash</GlossaryTooltip> function turns any input into a
-      fixed-length fingerprint. <GlossaryTooltip term="sha-256">SHA-256</GlossaryTooltip> always
-      produces a 256-bit (64 hex character) output, no matter how long or short your input is.
+      {t('shaExplorer.descriptionPrefix')}
+      <GlossaryTooltip term="hash">{t('shaExplorer.hashWord')}</GlossaryTooltip>
+      {t('shaExplorer.descriptionMiddle')}
+      <GlossaryTooltip term="sha-256" />
+      {t('shaExplorer.descriptionSuffix')}
     </p>
   </div>
 
   <!-- Mode Toggle -->
-  <div class="flex gap-3 mb-6" role="tablist" aria-label="Explorer mode">
+  <div class="flex gap-3 mb-6" role="tablist" aria-label={t('shaExplorer.explorerModeLabel')}>
     <button
       class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
       class:bg-cobalt={!comparisonMode}
@@ -75,7 +80,7 @@
       aria-controls="panel-live-hashing"
       id="tab-live-hashing"
     >
-      Live Hashing
+      {t('shaExplorer.liveHashing')}
     </button>
     <button
       class="px-4 py-2 rounded-lg font-medium transition-all duration-200"
@@ -90,7 +95,7 @@
       aria-controls="panel-avalanche"
       id="tab-avalanche"
     >
-      Avalanche Effect
+      {t('shaExplorer.avalancheEffect')}
     </button>
   </div>
 
@@ -99,30 +104,30 @@
     <div id="panel-live-hashing" role="tabpanel" aria-labelledby="tab-live-hashing" class="animate-fade-in">
       <div class="card mb-6">
         <label for="hash-input" class="block text-sm font-medium text-ink mb-2">
-          Enter any text
+          {t('shaExplorer.enterAnyText')}
         </label>
         <textarea
           id="hash-input"
           bind:value={input}
-          placeholder="Type something here..."
+          placeholder={t('shaExplorer.inputPlaceholder')}
           rows="3"
           class="input-field resize-none"
           aria-describedby="hash-input-help"
         ></textarea>
-        <p id="hash-input-help" class="sr-only">Type any text to see its SHA-256 hash generated in real time below.</p>
+        <p id="hash-input-help" class="sr-only">{t('shaExplorer.inputHelp')}</p>
       </div>
 
       <div class="card" aria-live="polite">
-        <HashDisplay {hash} label="SHA-256 Hash" />
+        <HashDisplay {hash} label={t('shaExplorer.hashLabel')} />
       </div>
 
       <!-- Learning Prompts -->
-      <aside class="mt-6 p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label="Learning prompts">
-        <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
+      <aside class="mt-6 p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label={t('shaExplorer.promptsLabel')}>
+        <h3 class="text-sm font-semibold text-cobalt mb-2">{t('common.tryItYourself')}</h3>
         <ul class="text-sm text-slate space-y-1">
-          <li>Type a short word and observe the hash.</li>
-          <li>Add a single character. Notice how the entire hash changes.</li>
-          <li>Try a very long sentence. The hash is still 64 characters.</li>
+          {#each t('shaExplorer.prompts').live as prompt}
+            <li>{prompt}</li>
+          {/each}
         </ul>
       </aside>
     </div>
@@ -132,9 +137,7 @@
     <div id="panel-avalanche" role="tabpanel" aria-labelledby="tab-avalanche" class="animate-fade-in">
       <div class="mb-4">
         <p class="text-slate text-sm leading-relaxed">
-          The <GlossaryTooltip term="avalanche effect">avalanche effect</GlossaryTooltip> means
-          that even a tiny change in input produces a completely different hash.
-          Compare two inputs below to see this in action.
+          {t('shaExplorer.comparisonDescription')}
         </p>
       </div>
 
@@ -142,12 +145,12 @@
         <!-- Input 1 -->
         <div class="card">
           <label for="input-1" class="block text-sm font-medium text-ink mb-2">
-            Input 1
+            {t('shaExplorer.inputOneLabel')}
           </label>
           <textarea
             id="input-1"
             bind:value={input1}
-            placeholder="First input..."
+            placeholder={t('shaExplorer.inputOnePlaceholder')}
             rows="2"
             class="input-field resize-none"
           ></textarea>
@@ -156,12 +159,12 @@
         <!-- Input 2 -->
         <div class="card">
           <label for="input-2" class="block text-sm font-medium text-ink mb-2">
-            Input 2
+            {t('shaExplorer.inputTwoLabel')}
           </label>
           <textarea
             id="input-2"
             bind:value={input2}
-            placeholder="Second input..."
+            placeholder={t('shaExplorer.inputTwoPlaceholder')}
             rows="2"
             class="input-field resize-none"
           ></textarea>
@@ -171,37 +174,45 @@
       <!-- Hash Comparison -->
       <div class="grid sm:grid-cols-2 gap-4 mb-6">
         <div class="card">
-          <HashDisplay hash={hash1} label="Hash of Input 1" />
+          <HashDisplay hash={hash1} label={t('shaExplorer.hashInputOneLabel')} />
         </div>
         <div class="card">
-          <HashDisplay hash={hash2} {differences} label="Hash of Input 2 (differences highlighted)" />
+          <HashDisplay hash={hash2} {differences} label={t('shaExplorer.hashInputTwoLabel')} />
         </div>
       </div>
 
       <!-- Statistics -->
       {#if hash1 && hash2}
         <div class="card mb-6" aria-live="polite">
-          <h3 class="text-sm font-semibold text-ink mb-3">Comparison Statistics</h3>
+          <h3 class="text-sm font-semibold text-ink mb-3">{t('shaExplorer.comparisonStats')}</h3>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
-              <div class="text-2xl font-bold text-cobalt" aria-label="{differingBitCount} bits changed">{differingBitCount}</div>
-              <div class="text-xs text-slate">Bits Changed</div>
+              <div
+                class="text-2xl font-bold text-cobalt"
+                aria-label={`${differingBitCount} ${t('shaExplorer.bitsChanged').toLowerCase()}`}
+              >
+                {differingBitCount}
+              </div>
+              <div class="text-xs text-slate">{t('shaExplorer.bitsChanged')}</div>
             </div>
             <div class="text-center p-3 bg-paper rounded-lg border border-mist">
               <div class="text-2xl font-bold text-cobalt">256</div>
-              <div class="text-xs text-slate">Total Bits</div>
+              <div class="text-xs text-slate">{t('shaExplorer.totalBits')}</div>
             </div>
             <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
-              <div class="text-2xl font-bold text-cobalt" aria-label="{((differingBitCount / 256) * 100).toFixed(1)} percent bits changed">
+              <div
+                class="text-2xl font-bold text-cobalt"
+                aria-label={`${((differingBitCount / 256) * 100).toFixed(1)}%`}
+              >
                 {((differingBitCount / 256) * 100).toFixed(1)}%
               </div>
-              <div class="text-xs text-slate">Bits Changed</div>
+              <div class="text-xs text-slate">{t('shaExplorer.bitsChanged')}</div>
             </div>
             <div class="text-center p-3 bg-paper rounded-lg border border-mist transition-all duration-200">
               <div class="text-2xl font-bold text-cobalt">
                 {differences.filter(d => d).length}
               </div>
-              <div class="text-xs text-slate">Hex Chars Changed</div>
+              <div class="text-xs text-slate">{t('shaExplorer.hexCharsChanged')}</div>
             </div>
           </div>
 
@@ -213,21 +224,21 @@
               aria-expanded={showBinary}
               aria-controls="binary-view"
             >
-              {showBinary ? 'Hide' : 'Show'} Binary Representation
+              {showBinary ? t('shaExplorer.hideBinary') : t('shaExplorer.showBinary')}
             </button>
           </div>
 
           {#if showBinary}
             <div id="binary-view" class="mt-4 grid sm:grid-cols-2 gap-4 animate-fade-in">
               <div>
-                <div class="text-xs font-medium text-slate mb-1">Binary of Hash 1</div>
+                <div class="text-xs font-medium text-slate mb-1">{t('shaExplorer.binaryHashOne')}</div>
                 <div class="hash-output text-xs overflow-x-auto">
                   {hexToBinary(hash1)}
                 </div>
               </div>
               <div>
-                <div class="text-xs font-medium text-slate mb-1">Binary of Hash 2 (differences in red)</div>
-                <div class="hash-output text-xs overflow-x-auto" aria-label="Binary representation with differences highlighted in red">
+                <div class="text-xs font-medium text-slate mb-1">{t('shaExplorer.binaryHashTwo')}</div>
+                <div class="hash-output text-xs overflow-x-auto" aria-label={t('shaExplorer.binaryDiffAria')}>
                   {#each hexToBinary(hash2).split('') as bit, i}
                     <span
                       class="transition-colors duration-150"
@@ -243,22 +254,20 @@
       {/if}
 
       <!-- Learning Prompts -->
-      <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label="Learning prompts">
-        <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
+      <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20" aria-label={t('shaExplorer.promptsLabel')}>
+        <h3 class="text-sm font-semibold text-cobalt mb-2">{t('common.tryItYourself')}</h3>
         <ul class="text-sm text-slate space-y-1">
-          <li>Change just one letter in Input 2. How many bits change?</li>
-          <li>Make the inputs identical. What percentage of bits differ?</li>
-          <li>Why does this property matter for security?</li>
+          {#each t('shaExplorer.prompts').comparison as prompt}
+            <li>{prompt}</li>
+          {/each}
         </ul>
       </aside>
 
       <!-- Explanation -->
-      <aside class="mt-6 p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label="Why the avalanche effect matters">
-        <h3 class="text-sm font-semibold text-emerald mb-2">Why this matters</h3>
+      <aside class="mt-6 p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label={t('shaExplorer.whyMattersLabel')}>
+        <h3 class="text-sm font-semibold text-emerald mb-2">{t('shaExplorer.whyMattersTitle')}</h3>
         <p class="text-sm text-slate leading-relaxed">
-          The avalanche effect is crucial for security. If similar inputs produced similar hashes,
-          attackers could guess inputs by comparing outputs. With SHA-256, about 50% of bits
-          change with any input modification, making such attacks impractical.
+          {t('shaExplorer.whyMattersDescription')}
         </p>
       </aside>
     </div>
