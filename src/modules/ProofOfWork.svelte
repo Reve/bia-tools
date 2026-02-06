@@ -1,9 +1,14 @@
 <script>
   import { sha256 } from '../lib/hash.js';
   import GlossaryTooltip from '../components/GlossaryTooltip.svelte';
+  import { getZeroLabel, language, translate } from '../lib/i18n.js';
 
   // Block data for mining
-  let data = $state('Hello, blockchain!');
+  const t = (key, vars) => translate($language, key, vars);
+
+  const getDefaultData = () => t('initialContent.helloBlockchain');
+
+  let data = $state(getDefaultData());
   let previousHash = '0000000000000000000000000000000000000000000000000000000000000000';
 
   // Difficulty: number of leading zeros required
@@ -112,7 +117,7 @@
     currentHash = '';
     attempts = 0;
     elapsedMs = 0;
-    data = 'Hello, blockchain!';
+    data = getDefaultData();
     difficulty = 2;
     timeLimitSec = 30;
   }
@@ -127,30 +132,29 @@
   }
 </script>
 
-<section class="proof-of-work" aria-label="Proof of Work Explorer">
+<section class="proof-of-work" aria-label={t('proofOfWork.title')}>
   <!-- Header -->
   <div class="mb-8">
-    <h2 class="text-2xl font-semibold text-ink mb-3">Proof of Work</h2>
+    <h2 class="text-2xl font-semibold text-ink mb-3">{t('proofOfWork.title')}</h2>
     <p class="text-slate leading-relaxed max-w-2xl">
-      <GlossaryTooltip term="proof of work">Proof of work</GlossaryTooltip> requires finding a
-      <GlossaryTooltip term="nonce">nonce</GlossaryTooltip> that makes the block's hash start with a
-      certain number of zeros. The more zeros required, the harder (and slower) the search becomes.
-      This is what makes tampering with a <GlossaryTooltip term="blockchain">blockchain</GlossaryTooltip> expensive.
+      {t('proofOfWork.description')}
     </p>
   </div>
 
   <!-- Configuration Card -->
   <div class="card mb-6">
-    <h3 class="text-lg font-semibold text-ink mb-4">Mining Configuration</h3>
+    <h3 class="text-lg font-semibold text-ink mb-4">{t('proofOfWork.miningConfigTitle')}</h3>
 
     <div class="grid sm:grid-cols-2 gap-6">
       <!-- Data Input -->
       <div>
-        <label for="pow-data" class="block text-sm font-medium text-ink mb-1">Block Data</label>
+        <label for="pow-data" class="block text-sm font-medium text-ink mb-1">
+          {t('proofOfWork.blockDataLabel')}
+        </label>
         <textarea
           id="pow-data"
           bind:value={data}
-          placeholder="Enter block data..."
+          placeholder={t('proofOfWork.blockDataPlaceholder')}
           rows="2"
           class="input-field resize-none text-sm"
           disabled={isMining}
@@ -160,9 +164,9 @@
       <!-- Difficulty Slider -->
       <div>
         <label for="pow-difficulty" class="block text-sm font-medium text-ink mb-1">
-          <GlossaryTooltip term="difficulty">Difficulty</GlossaryTooltip>:
+          <GlossaryTooltip term="difficulty">{t('proofOfWork.difficultyLabel')}</GlossaryTooltip>:
           <span class="font-mono text-cobalt">{difficulty}</span>
-          <span class="text-slate font-normal"> (leading zeros)</span>
+          <span class="text-slate font-normal"> {t('proofOfWork.leadingZerosLabel')}</span>
         </label>
         <input
           id="pow-difficulty"
@@ -173,18 +177,18 @@
           disabled={isMining}
           class="w-full h-2 bg-mist rounded-lg appearance-none cursor-pointer accent-cobalt
                  disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Set difficulty from {MIN_DIFFICULTY} to {MAX_DIFFICULTY} leading zeros"
+          aria-label={t('proofOfWork.difficultyAria', { min: MIN_DIFFICULTY, max: MAX_DIFFICULTY })}
         />
         <div class="flex justify-between text-xs text-slate mt-1">
-          <span>Easy ({MIN_DIFFICULTY})</span>
-          <span>Hard ({MAX_DIFFICULTY})</span>
+          <span>{t('proofOfWork.easyLabel', { min: MIN_DIFFICULTY })}</span>
+          <span>{t('proofOfWork.hardLabel', { max: MAX_DIFFICULTY })}</span>
         </div>
       </div>
 
       <!-- Time Limit Slider -->
       <div>
         <label for="pow-time-limit" class="block text-sm font-medium text-ink mb-1">
-          Time Limit:
+          {t('proofOfWork.timeLimitLabel')}:
           <span class="font-mono text-cobalt">{timeLimitSec}s</span>
         </label>
         <input
@@ -197,7 +201,7 @@
           disabled={isMining}
           class="w-full h-2 bg-mist rounded-lg appearance-none cursor-pointer accent-cobalt
                  disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Set time limit from {MIN_TIME_LIMIT} to {MAX_TIME_LIMIT} seconds"
+          aria-label={t('proofOfWork.timeLimitAria', { min: MIN_TIME_LIMIT, max: MAX_TIME_LIMIT })}
         />
         <div class="flex justify-between text-xs text-slate mt-1">
           <span>{MIN_TIME_LIMIT}s</span>
@@ -208,7 +212,7 @@
 
     <!-- Target Pattern Display -->
     <div class="mt-4 p-3 bg-ink/5 rounded-lg">
-      <div class="text-xs font-medium text-slate mb-1">Target: hash must start with</div>
+      <div class="text-xs font-medium text-slate mb-1">{t('proofOfWork.targetLabel')}</div>
       <div class="font-mono text-sm">
         <span class="text-cobalt font-bold">{targetPrefix}</span><span class="text-slate/40">{'x'.repeat(64 - difficulty)}</span>
       </div>
@@ -221,27 +225,27 @@
       <button
         class="btn-primary"
         onclick={startMining}
-        aria-label="Start mining to find a nonce that meets the difficulty requirement"
+        aria-label={t('proofOfWork.startMiningAria')}
       >
-        Start Mining
+        {t('proofOfWork.startMining')}
       </button>
     {:else}
       <button
         class="px-4 py-2 rounded-lg font-medium text-sm text-white bg-rose hover:bg-rose/90
                transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
         onclick={stopMining}
-        aria-label="Stop the mining process"
+        aria-label={t('proofOfWork.stopMiningAria')}
       >
-        Stop Mining
+        {t('proofOfWork.stopMining')}
       </button>
     {/if}
     <button
       class="btn-secondary"
       onclick={resetMining}
       disabled={isMining}
-      aria-label="Reset mining configuration and results"
+      aria-label={t('proofOfWork.resetAria')}
     >
-      Reset
+      {t('proofOfWork.reset')}
     </button>
   </div>
 
@@ -253,18 +257,18 @@
         <h3 class="text-lg font-semibold text-ink flex items-center gap-2">
           {#if isMining}
             <span class="w-3 h-3 rounded-full bg-amber animate-pulse" aria-hidden="true"></span>
-            Mining in Progress
+            {t('proofOfWork.miningInProgress')}
           {:else if miningResult?.timedOut}
             <span class="w-3 h-3 rounded-full bg-rose" aria-hidden="true"></span>
-            Time Limit Reached
+            {t('proofOfWork.timeLimitReached')}
           {:else}
             <span class="w-3 h-3 rounded-full bg-emerald" aria-hidden="true"></span>
-            Nonce Found
+            {t('proofOfWork.nonceFound')}
           {/if}
         </h3>
         {#if isMining}
           <span class="text-xs text-slate">
-            Limit: {formatTime(timeLimitMs)}
+            {t('proofOfWork.limitLabel', { time: formatTime(timeLimitMs) })}
           </span>
         {/if}
       </div>
@@ -272,25 +276,25 @@
       <!-- Statistics Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
         <div class="text-center p-3 bg-ink/5 rounded-lg">
-          <div class="text-xs text-slate mb-1">Nonce</div>
+          <div class="text-xs text-slate mb-1">{t('proofOfWork.stats.nonce')}</div>
           <div class="font-mono text-sm font-semibold text-ink">
             {formatNumber(isMining ? currentNonce : (miningResult?.nonce ?? 0))}
           </div>
         </div>
         <div class="text-center p-3 bg-ink/5 rounded-lg">
-          <div class="text-xs text-slate mb-1">Attempts</div>
+          <div class="text-xs text-slate mb-1">{t('proofOfWork.stats.attempts')}</div>
           <div class="font-mono text-sm font-semibold text-ink">
             {formatNumber(isMining ? attempts : (miningResult?.attempts ?? 0))}
           </div>
         </div>
         <div class="text-center p-3 bg-ink/5 rounded-lg">
-          <div class="text-xs text-slate mb-1">Time</div>
+          <div class="text-xs text-slate mb-1">{t('proofOfWork.stats.time')}</div>
           <div class="font-mono text-sm font-semibold text-ink">
             {formatTime(isMining ? elapsedMs : (miningResult?.time ?? 0))}
           </div>
         </div>
         <div class="text-center p-3 bg-ink/5 rounded-lg">
-          <div class="text-xs text-slate mb-1">Difficulty</div>
+          <div class="text-xs text-slate mb-1">{t('proofOfWork.stats.difficulty')}</div>
           <div class="font-mono text-sm font-semibold text-cobalt">
             {'0'.repeat(difficulty)} ({difficulty})
           </div>
@@ -300,7 +304,7 @@
       <!-- Current Hash Display -->
       {#if isMining && currentHash}
         <div class="mb-4">
-          <div class="text-xs font-medium text-slate mb-1">Latest Hash Tested</div>
+          <div class="text-xs font-medium text-slate mb-1">{t('proofOfWork.latestHash')}</div>
           <div class="hash-output font-mono text-xs break-all">
             {currentHash}
           </div>
@@ -310,7 +314,7 @@
       <!-- Result Hash Display -->
       {#if miningResult && !miningResult.timedOut}
         <div>
-          <div class="text-xs font-medium text-slate mb-1">Winning Hash</div>
+          <div class="text-xs font-medium text-slate mb-1">{t('proofOfWork.winningHash')}</div>
           <div class="hash-output font-mono text-xs break-all">
             {#each miningResult.hash.split('') as char, i}
               <span
@@ -320,17 +324,20 @@
             {/each}
           </div>
           <p class="text-xs text-emerald mt-2 font-medium">
-            Hash starts with {difficulty} zero{difficulty !== 1 ? 's' : ''} — proof of work satisfied.
+            {t('proofOfWork.hashStartsWith', {
+              count: difficulty,
+              zeroLabel: getZeroLabel($language, difficulty)
+            })}
           </p>
         </div>
       {:else if miningResult?.timedOut}
         <div>
           <p class="text-sm text-rose font-medium">
-            Could not find a valid nonce within {formatTime(timeLimitMs)}.
-            Tried {formatNumber(miningResult.attempts)} nonces.
+            {t('proofOfWork.timeoutMessage', { time: formatTime(timeLimitMs) })}
+            {t('proofOfWork.timeoutAttempts', { attempts: formatNumber(miningResult.attempts) })}
           </p>
           <p class="text-xs text-slate mt-1">
-            Try a lower difficulty or different data.
+            {t('proofOfWork.timeoutSuggestion')}
           </p>
         </div>
       {/if}
@@ -339,20 +346,20 @@
 
   <!-- Nonce Search Visualization -->
   {#if isMining}
-    <div class="card mb-6" aria-label="Nonce search visualization">
-      <h3 class="text-sm font-semibold text-ink mb-3">Nonce Search</h3>
+    <div class="card mb-6" aria-label={t('proofOfWork.nonceSearchLabel')}>
+      <h3 class="text-sm font-semibold text-ink mb-3">{t('proofOfWork.nonceSearchLabel')}</h3>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
         {#each Array(8) as _, i}
           {@const n = Math.max(0, currentNonce - 7 + i)}
           <div
             class="p-2 rounded text-xs font-mono transition-all duration-100 {i === 7 ? 'bg-amber/10 text-amber font-bold' : 'bg-ink/5 text-slate'}"
           >
-            Nonce: {formatNumber(n)}
+            {t('proofOfWork.nonceLabel', { value: formatNumber(n) })}
           </div>
         {/each}
       </div>
       <div class="mt-3 w-full bg-mist rounded-full h-1.5" role="progressbar"
-           aria-label="Time elapsed" aria-valuenow={elapsedMs} aria-valuemax={timeLimitMs}>
+           aria-label={t('proofOfWork.timeElapsed')} aria-valuenow={elapsedMs} aria-valuemax={timeLimitMs}>
         <div
           class="h-1.5 rounded-full transition-all duration-300"
           class:bg-amber={elapsedMs < timeLimitMs * 0.75}
@@ -367,43 +374,31 @@
   {/if}
 
   <!-- Learning Prompts -->
-  <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20 mb-6" aria-label="Learning prompts">
-    <h3 class="text-sm font-semibold text-cobalt mb-2">Try it yourself</h3>
+  <aside class="p-4 bg-cobalt/5 rounded-lg border border-cobalt/20 mb-6" aria-label={t('common.promptsLabel')}>
+    <h3 class="text-sm font-semibold text-cobalt mb-2">{t('common.tryItYourself')}</h3>
     <ul class="text-sm text-slate space-y-2">
-      <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">1</span>
-        <span>Set difficulty to 2 and start the search. How many attempts did it take?</span>
-      </li>
-      <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">2</span>
-        <span>Increase difficulty to 3 and compare the time and attempts. How much harder was it?</span>
-      </li>
-      <li class="flex items-start gap-2">
-        <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">3</span>
-        <span>Why does higher difficulty make tampering with earlier blocks impractical?</span>
-      </li>
+      {#each t('proofOfWork.prompts') as prompt, index}
+        <li class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" aria-hidden="true">{index + 1}</span>
+          <span>{prompt}</span>
+        </li>
+      {/each}
     </ul>
   </aside>
 
   <!-- Explanation Cards -->
   <div class="grid sm:grid-cols-2 gap-4">
-    <aside class="p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label="How proof of work secures the chain">
-      <h3 class="text-sm font-semibold text-emerald mb-2">How Proof of Work Secures the Chain</h3>
+    <aside class="p-4 bg-emerald/5 rounded-lg border border-emerald/20" aria-label={t('proofOfWork.secureChainTitle')}>
+      <h3 class="text-sm font-semibold text-emerald mb-2">{t('proofOfWork.secureChainTitle')}</h3>
       <p class="text-sm text-slate leading-relaxed">
-        To add a block, miners must find a <GlossaryTooltip term="nonce">nonce</GlossaryTooltip> that
-        produces a hash with the required leading zeros. This takes real computational effort. To tamper
-        with a past block, an attacker would need to redo this work for that block and every block
-        after it — faster than the rest of the network.
+        {t('proofOfWork.secureChainDescription')}
       </p>
     </aside>
 
-    <aside class="p-4 bg-amber/5 rounded-lg border border-amber/20" aria-label="Why difficulty matters">
-      <h3 class="text-sm font-semibold text-amber mb-2">Why Difficulty Matters</h3>
+    <aside class="p-4 bg-amber/5 rounded-lg border border-amber/20" aria-label={t('proofOfWork.difficultyMattersTitle')}>
+      <h3 class="text-sm font-semibold text-amber mb-2">{t('proofOfWork.difficultyMattersTitle')}</h3>
       <p class="text-sm text-slate leading-relaxed">
-        Each additional leading zero roughly multiplies the search space by 16. A
-        <GlossaryTooltip term="difficulty">difficulty</GlossaryTooltip> of 2 might take hundreds of
-        attempts, while a difficulty of 5 can take millions. Real blockchains use much higher
-        difficulties, making history rewriting practically impossible.
+        {t('proofOfWork.difficultyMattersDescription')}
       </p>
     </aside>
   </div>

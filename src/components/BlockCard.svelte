@@ -1,6 +1,7 @@
 <script>
   import { sha256 } from '../lib/hash.js';
   import GlossaryTooltip from './GlossaryTooltip.svelte';
+  import { language, translate } from '../lib/i18n.js';
 
   let {
     blockNumber = 1,
@@ -14,6 +15,8 @@
   } = $props();
 
   let currentHash = $state('');
+
+  const t = (key, vars) => translate($language, key, vars);
 
   // Compute hash from block contents
   $effect(() => {
@@ -40,7 +43,10 @@
 <div
   class="block-card card transition-all duration-200 {isValid ? 'border-emerald bg-emerald/5' : 'border-rose bg-rose/5'}"
   role="region"
-  aria-label="Block {blockNumber}: {isValid ? 'Valid' : 'Invalid'}"
+  aria-label={t('blockCard.blockStatusAria', {
+    number: blockNumber,
+    status: isValid ? t('blockCard.valid') : t('blockCard.invalid')
+  })}
 >
   <!-- Block Header -->
   <div class="flex items-center justify-between mb-4">
@@ -53,41 +59,48 @@
       >
         {blockNumber}
       </span>
-      Block {blockNumber}
+      {t('blockCard.blockLabel', { number: blockNumber })}
     </h3>
     <span
       class="text-xs font-medium px-2 py-1 rounded transition-colors duration-200"
       class:badge-valid={isValid}
       class:badge-invalid={!isValid}
       role="status"
-      aria-label="Block is {isValid ? 'valid' : 'invalid'}"
+      aria-label={t('blockCard.statusAria', {
+        status: isValid ? t('blockCard.valid') : t('blockCard.invalid')
+      })}
     >
-      {isValid ? 'Valid' : 'Invalid'}
+      {isValid ? t('blockCard.valid') : t('blockCard.invalid')}
     </span>
   </div>
 
   <!-- Data Field -->
   <div class="mb-4">
     <label for="data-{blockNumber}" class="block text-sm font-medium text-ink mb-1">
-      <GlossaryTooltip term="block">Data</GlossaryTooltip>
+      <GlossaryTooltip term="block">{t('blockCard.dataLabel')}</GlossaryTooltip>
     </label>
     {#if editable}
       <textarea
         id="data-{blockNumber}"
         bind:value={data}
-        placeholder="Enter block data..."
+        placeholder={t('blockCard.dataPlaceholder')}
         rows="2"
         class="input-field resize-none text-sm"
       ></textarea>
     {:else}
-      <div class="input-field text-sm bg-mist/30 cursor-not-allowed" aria-label="Data: {data || '(empty)'}">{data || '(empty)'}</div>
+      <div
+        class="input-field text-sm bg-mist/30 cursor-not-allowed"
+        aria-label={`${t('blockCard.dataLabel')}: ${data || t('blockCard.emptyData')}`}
+      >
+        {data || t('blockCard.emptyData')}
+      </div>
     {/if}
   </div>
 
   <!-- Nonce Field -->
   <div class="mb-4">
     <label for="nonce-{blockNumber}" class="block text-sm font-medium text-ink mb-1">
-      <GlossaryTooltip term="nonce">Nonce</GlossaryTooltip>
+      <GlossaryTooltip term="nonce">{t('blockCard.nonceLabel')}</GlossaryTooltip>
     </label>
     {#if editable}
       <div class="flex items-center gap-2">
@@ -104,7 +117,7 @@
           class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors duration-150
                  focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
           disabled={nonce <= 0}
-          aria-label="Decrease nonce"
+          aria-label={t('blockCard.decreaseNonce')}
         >
           -
         </button>
@@ -113,13 +126,18 @@
           onclick={incrementNonce}
           class="w-10 h-10 rounded-lg bg-mist hover:bg-slate/20 text-ink font-bold transition-colors duration-150
                  focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-1"
-          aria-label="Increase nonce"
+          aria-label={t('blockCard.increaseNonce')}
         >
           +
         </button>
       </div>
     {:else}
-      <div class="input-field text-sm font-mono bg-mist/30 cursor-not-allowed" aria-label="Nonce: {nonce}">{nonce}</div>
+      <div
+        class="input-field text-sm font-mono bg-mist/30 cursor-not-allowed"
+        aria-label={`${t('blockCard.nonceLabel')}: ${nonce}`}
+      >
+        {nonce}
+      </div>
     {/if}
   </div>
 
@@ -127,12 +145,12 @@
   {#if showPreviousHash}
     <div class="mb-4">
       <label class="block text-sm font-medium text-ink mb-1">
-        <GlossaryTooltip term="previous hash">Previous Hash</GlossaryTooltip>
+        <GlossaryTooltip term="previous hash">{t('blockCard.previousHashLabel')}</GlossaryTooltip>
       </label>
       <div class="hash-output text-xs font-mono break-all transition-colors duration-200"
         class:text-emerald={isValid}
         class:text-rose={!isValid}
-        aria-label="Previous hash value"
+        aria-label={t('blockCard.previousHashAria')}
       >
         {previousHash}
       </div>
@@ -142,10 +160,10 @@
   <!-- Current Hash Field -->
   <div>
     <label class="block text-sm font-medium text-ink mb-1">
-      <GlossaryTooltip term="hash">Current Hash</GlossaryTooltip>
+      <GlossaryTooltip term="hash">{t('blockCard.currentHashLabel')}</GlossaryTooltip>
     </label>
-    <div class="hash-output text-xs font-mono break-all" aria-live="polite" aria-label="Current hash value">
-      {currentHash || 'Computing...'}
+    <div class="hash-output text-xs font-mono break-all" aria-live="polite" aria-label={t('blockCard.currentHashAria')}>
+      {currentHash || t('blockCard.computing')}
     </div>
   </div>
 </div>
